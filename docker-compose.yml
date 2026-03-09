@@ -1,0 +1,97 @@
+services:
+  # Nessie Catalog Server
+  nessie:
+    image: projectnessie/nessie:latest
+    container_name: catalog
+    networks:
+      - air_quality_net
+    ports:
+      - "19120:19120"
+
+  # Minio Storage Server (The Data Lake)
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password
+      - MINIO_DOMAIN=storage
+      - MINIO_REGION_NAME=us-east-1
+      - MINIO_REGION=us-east-1
+    networks:
+      - air_quality_net
+    ports:
+      - "9001:9001"
+      - "9000:9000"
+    volumes:
+      - minio_data:/data
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Starting MinIO server...' &&
+      minio server /data --console-address :9001 &
+
+      echo 'Waiting for MinIO to start...' &&
+      until curl --silent --fail http://localhost:9000/minio/health/live; do sleep 2; done &&
+      
+      echo 'MinIO is running, configuring buckets...' &&
+      mc alias set local http://localhost:9000 admin password &&
+      if ! mc ls local/raw > /dev/null 2>&1; then mc mb local/raw; fi &&
+      if ! mc ls local/bronze > /dev/null 2>&1; then mc mb local/bronze; fi &&
+      if ! mc ls local/silver > /dev/null 2>&1; then mc mb local/silver; fi &&
+      if ! mc ls local/gold > /dev/null 2>&1; then mc mb local/gold; fi &&
+      echo 'All data lake zones created successfully.'
+      && tail -f /dev/null"
+
+  # Dremio Query Engine
+  dremio:
+    platform: linux/x86_64
+    image: dremio/dremio-oss:latest
+    container_name: dremio
+    ports:
+      - "9047:9047"
+      - "31010:31010"
+      - "32010:32010"
+    environment:
+      - DREMIO_JAVA_SERVER_EXTRA_OPTS=-Dpaths.dist=file:///opt/dremio/data/dist
+    volumes:
+      - dremio_data:/opt/dremio/data
+    networks:
+      - air_quality_net
+  
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=airflow  # Airflow 3.x needs its own DB/Schema
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. The Airflow 3.x Orchestrator
+  airflow:
+    image: apache/airflow:3.0.1-python3.11
+    container_name: airflow
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      # Note the connection string uses the service name 'postgres'
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:password@postgres:5432/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+networks:
+  air_quality_net:
+
+volumes:
+  minio_data:
+  dremio_data:
+  postgres_data:
