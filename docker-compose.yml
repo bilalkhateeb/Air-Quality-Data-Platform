@@ -64,21 +64,30 @@ services:
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=airflow  # Airflow 3.x needs its own DB/Schema
+      - POSTGRES_DB=Aria_ods  # <-- Your new critical DB name
+    networks:
+      - air_quality_net
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # 2. The Airflow 3.x Orchestrator
   airflow:
     image: apache/airflow:3.0.1-python3.11
     container_name: airflow
+    restart: always
+    command: standalone 
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      # Note the connection string uses the service name 'postgres'
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:password@postgres:5432/airflow
+      # <-- Updated connection string to match Aria_ods
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:password@postgres:5432/Aria_ods
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _AIRFLOW_DB_UPGRADE=True
+      - _AIRFLOW_WWW_USER_CREATE=True
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+    networks:
+      - air_quality_net
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
