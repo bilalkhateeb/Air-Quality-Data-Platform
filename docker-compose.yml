@@ -1,5 +1,6 @@
+version: "3.9"
+
 services:
-  # Nessie Catalog Server
   nessie:
     image: projectnessie/nessie:latest
     container_name: catalog
@@ -8,94 +9,111 @@ services:
     ports:
       - "19120:19120"
 
-  # Minio Storage Server (The Data Lake)
   minio:
     image: minio/minio:latest
     container_name: minio
     environment:
-      - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=password
-      - MINIO_DOMAIN=storage
-      - MINIO_REGION_NAME=us-east-1
-      - MINIO_REGION=us-east-1
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password
+      MINIO_DOMAIN: storage
+      MINIO_REGION_NAME: us-east-1
+      MINIO_REGION: us-east-1
     networks:
       - air_quality_net
     ports:
-      - "9001:9001"
       - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio_init
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - air_quality_net
     entrypoint: >
       /bin/sh -c "
-      echo 'Starting MinIO server...' &&
-      minio server /data --console-address :9001 &
+      mc alias set local http://minio:9000 admin password &&
+      mc mb local/raw || true &&
+      mc mb local/bronze || true &&
+      mc mb local/silver || true &&
+      mc mb local/gold || true &&
+      echo 'MinIO buckets are ready.'
+      "
 
-      echo 'Waiting for MinIO to start...' &&
-      until curl --silent --fail http://localhost:9000/minio/health/live; do sleep 2; done &&
-      
-      echo 'MinIO is running, configuring buckets...' &&
-      mc alias set local http://localhost:9000 admin password &&
-      if ! mc ls local/raw > /dev/null 2>&1; then mc mb local/raw; fi &&
-      if ! mc ls local/bronze > /dev/null 2>&1; then mc mb local/bronze; fi &&
-      if ! mc ls local/silver > /dev/null 2>&1; then mc mb local/silver; fi &&
-      if ! mc ls local/gold > /dev/null 2>&1; then mc mb local/gold; fi &&
-      echo 'All data lake zones created successfully.'
-      && tail -f /dev/null"
-
-  # Dremio Query Engine
   dremio:
     platform: linux/x86_64
     image: dremio/dremio-oss:latest
     container_name: dremio
+    environment:
+      DREMIO_JAVA_SERVER_EXTRA_OPTS: -Dpaths.dist=file:///opt/dremio/data/dist
+    networks:
+      - air_quality_net
     ports:
       - "9047:9047"
       - "31010:31010"
       - "32010:32010"
-    environment:
-      - DREMIO_JAVA_SERVER_EXTRA_OPTS=-Dpaths.dist=file:///opt/dremio/data/dist
     volumes:
       - dremio_data:/opt/dremio/data
-    networks:
-      - air_quality_net
-  
+
   postgres:
     image: postgres:15
     container_name: postgres
     environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=Aria_ods  # <-- Your new critical DB name
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
     networks:
       - air_quality_net
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   airflow:
     image: apache/airflow:3.0.1-python3.11
     container_name: airflow
     restart: always
-    command: standalone 
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: standalone
     environment:
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      # <-- Updated connection string to match Aria_ods
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:password@postgres:5432/Aria_ods
-      - AIRFLOW__CORE__LOAD_EXAMPLES=False
-      - _AIRFLOW_DB_UPGRADE=True
-      - _AIRFLOW_WWW_USER_CREATE=True
-      - _AIRFLOW_WWW_USER_USERNAME=admin
-      - _AIRFLOW_WWW_USER_PASSWORD=admin
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:password@postgres:5432/airflow_meta
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+      _AIRFLOW_WWW_USER_FIRSTNAME: Airflow
+      _AIRFLOW_WWW_USER_LASTNAME: Admin
+      _AIRFLOW_WWW_USER_ROLE: Admin
+      _AIRFLOW_WWW_USER_EMAIL: admin@example.com
     networks:
       - air_quality_net
+    ports:
+      - "8080:8080"
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
 
 networks:
   air_quality_net:
