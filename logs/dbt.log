@@ -1,0 +1,49 @@
+[0m16:16:34.379356 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017A25D47EC0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017A28C421E0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017A28C42240>]}
+
+
+============================== 16:16:34.394784 | d55f1445-33ad-4922-b9b1-dd01ea1040fc ==============================
+[0m16:16:34.394784 [info ] [MainThread]: Running with dbt=1.11.7
+[0m16:16:34.398807 [debug] [MainThread]: running dbt with arguments {'version_check': 'True', 'no_print': 'None', 'static_parser': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'target_path': 'None', 'printer_width': '80', 'write_json': 'True', 'introspect': 'True', 'log_cache_events': 'False', 'empty': 'None', 'cache_selected_only': 'False', 'fail_fast': 'False', 'debug': 'False', 'log_format': 'default', 'profiles_dir': 'C:\\Users\\Bilal\\.dbt', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'partial_parse': 'True', 'use_colors': 'True', 'invocation_command': 'dbt init air_quality', 'indirect_selection': 'eager', 'use_experimental_parser': 'False', 'log_path': 'logs'}
+[0m16:16:34.453453 [debug] [MainThread]: Starter project path: C:\Users\Bilal\Desktop\Github Repository\Air-Quality-Data-Platform\dbt-env\Lib\site-packages\dbt\include\starter_project
+[0m16:16:34.517870 [info ] [MainThread]: 
+Your new dbt project "air_quality" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m16:16:34.533624 [info ] [MainThread]: Setting up your profile.
+[0m16:23:13.276763 [info ] [MainThread]: Profile air_quality written to C:\Users\Bilal\.dbt\profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m16:23:13.284782 [debug] [MainThread]: Command `dbt init` succeeded at 16:23:13.284782 after 400.36 seconds
+[0m16:23:13.295466 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017A293176E0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017A29317EF0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000017A2AEBDD30>]}
+[0m16:23:13.298115 [debug] [MainThread]: Flushing usage events
+[0m16:23:15.398656 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m16:51:08.897603 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x00000236E9D8DBB0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x00000236E9D8E330>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x00000236E888A780>]}
+
+
+============================== 16:51:08.910771 | 30289ed0-1f1e-4907-879a-4603b4a2f047 ==============================
+[0m16:51:08.910771 [info ] [MainThread]: Running with dbt=1.11.7
+[0m16:51:08.917393 [debug] [MainThread]: running dbt with arguments {'version_check': 'True', 'no_print': 'None', 'static_parser': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'target_path': 'None', 'printer_width': '80', 'write_json': 'True', 'introspect': 'True', 'log_cache_events': 'False', 'empty': 'None', 'cache_selected_only': 'False', 'log_format': 'default', 'debug': 'False', 'fail_fast': 'False', 'profiles_dir': 'C:\\Users\\Bilal\\.dbt', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'partial_parse': 'True', 'indirect_selection': 'eager', 'invocation_command': 'dbt debug', 'use_colors': 'True', 'use_experimental_parser': 'False', 'log_path': 'logs'}
+[0m16:51:08.969950 [info ] [MainThread]: dbt version: 1.11.7
+[0m16:51:08.970961 [info ] [MainThread]: python version: 3.12.4
+[0m16:51:08.971961 [info ] [MainThread]: python path: C:\Users\Bilal\Desktop\Github Repository\Air-Quality-Data-Platform\dbt-env\Scripts\python.exe
+[0m16:51:08.972965 [info ] [MainThread]: os info: Windows-11-10.0.26100-SP0
+[0m16:51:09.272211 [info ] [MainThread]: Using profiles dir at C:\Users\Bilal\.dbt
+[0m16:51:09.273893 [info ] [MainThread]: Using profiles.yml file at C:\Users\Bilal\.dbt\profiles.yml
+[0m16:51:09.275115 [info ] [MainThread]: Using dbt_project.yml file at C:\Users\Bilal\Desktop\Github Repository\Air-Quality-Data-Platform\dbt_project.yml
+[0m16:51:09.277983 [error] [MainThread]: Encountered an error:
+Internal Error
+  Profile should not be None if loading profile completed
+[0m16:51:09.280831 [debug] [MainThread]: Command `dbt debug` failed at 16:51:09.280831 after 0.74 seconds
+[0m16:51:09.282693 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x00000236E9478380>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x00000236E9ED6F30>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x00000236E9937500>]}
+[0m16:51:09.284085 [debug] [MainThread]: Flushing usage events
+[0m16:51:11.312910 [debug] [MainThread]: An error was encountered while trying to flush usage events
