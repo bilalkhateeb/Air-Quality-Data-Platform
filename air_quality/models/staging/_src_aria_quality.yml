@@ -1,0 +1,57 @@
+version: 2
+
+sources:
+  - name: aria_quality
+    description: Raw air quality source tables landed in the platform
+    schema: raw_minio.air_quality
+    tables:
+      - name: rqa_dati_aria_cor
+        description: Raw measurements table
+
+      - name: rqa_configurazioni
+        description: Raw configurations table
+
+      - name: rqa_parametri
+        description: Raw parameters table
+
+      - name: rqa_ubicazioni
+        description: Raw locations table
+
+      - name: rqa_enti
+        description: Raw entities table
+
+      - name: rqa_t_reti
+        description: Raw networks lookup table
+
+      - name: rqa_t_frequenze
+        description: Raw frequencies lookup table
+
+      - name: t_unita_misura
+        description: Raw units of measure table
+
+      - name: province
+        description: Raw provinces lookup table
+
+      - name: comuni
+        description: Raw municipalities lookup table
+
+      - name: rqa_t_zona
+        description: Raw zone lookup table
+
+      - name: rqa_t_stclass_eu
+        description: Raw station classification lookup table
+
+      - name: rqa_elementi
+        description: Raw elements lookup table
+
+      - name: rqa_metodi
+        description: Raw methods lookup table
+
+      - name: comuni_usl
+        description: Raw comuni_usl lookup table
+
+      - name: comuni_zone
+        description: Raw comuni_zone lookup table
+
+      - name: v_rqa_rete_regionale_ipr
+        description: Raw regional network view table

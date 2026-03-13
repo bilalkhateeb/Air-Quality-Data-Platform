@@ -32,5 +32,15 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   air_quality:
     # Config indicated by + and applies to all files under models/example/
-    example:
-      +materialized: view
+    staging:
+      +schema: bronze
+      +materialized: table
+
+    intermediate:
+      +schema: silver
+      +materialized: table
+
+    marts:
+      +schema: gold
+      +materialized: table
+    

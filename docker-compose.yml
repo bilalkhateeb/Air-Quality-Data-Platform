@@ -8,6 +8,15 @@ services:
       - air_quality_net
     ports:
       - "19120:19120"
+    environment:
+      nessie.catalog.default-warehouse: lakehouse
+      nessie.catalog.warehouses.lakehouse.location: s3://lakehouse
+
+      nessie.catalog.service.s3.default-options.endpoint: http://minio:9000
+      nessie.catalog.service.s3.default-options.path-style-access: true
+      nessie.catalog.service.s3.default-options.region: us-east-1
+      nessie.catalog.service.s3.default-options.access-key.name: admin
+      nessie.catalog.service.s3.default-options.access-key.secret: password
 
   minio:
     image: minio/minio:latest
