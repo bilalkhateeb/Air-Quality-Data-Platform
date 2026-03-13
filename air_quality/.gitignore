@@ -1,4 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
+# Virtual environments
+dbt-env/
+.venv/
+venv/
+
+# dbt
 target/
 dbt_packages/
 logs/
+package-lock.yml
+
+# Airflow local folders
+airflow.db
+standalone_admin_password.txt
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

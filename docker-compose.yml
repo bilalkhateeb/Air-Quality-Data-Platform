@@ -53,9 +53,7 @@ services:
       /bin/sh -c "
       mc alias set local http://minio:9000 admin password &&
       mc mb local/raw || true &&
-      mc mb local/bronze || true &&
-      mc mb local/silver || true &&
-      mc mb local/gold || true &&
+      mc mb local/lakehouse || true &&
       echo 'MinIO buckets are ready.'
       "
 
