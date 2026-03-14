@@ -1,9 +1,10 @@
 version: 2
 
 sources:
-  - name: aria_quality
+  - name: aria
     description: Raw air quality source tables landed in the platform
-    schema: raw_minio.air_quality
+    database: raw_minio
+    schema: air_quality
     tables:
       - name: rqa_dati_aria_cor
         description: Raw measurements table
