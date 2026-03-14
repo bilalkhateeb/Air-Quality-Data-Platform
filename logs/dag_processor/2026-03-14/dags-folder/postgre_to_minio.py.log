@@ -221,3 +221,4 @@
 {"timestamp":"2026-03-14T18:18:07.950042","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/postgre_to_minio.py","logger":"airflow.models.dagbag.DagBag"}
 {"timestamp":"2026-03-14T18:18:39.081915","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/postgre_to_minio.py","logger":"airflow.models.dagbag.DagBag"}
 {"timestamp":"2026-03-14T18:19:10.792425","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/postgre_to_minio.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2026-03-14T18:19:42.020019","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/postgre_to_minio.py","logger":"airflow.models.dagbag.DagBag"}
