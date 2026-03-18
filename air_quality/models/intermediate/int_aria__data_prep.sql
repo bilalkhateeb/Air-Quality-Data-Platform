@@ -1,5 +1,3 @@
-{{ config(materialized='table') }}
-
 with dati_aria as (
 
     select
@@ -9,6 +7,8 @@ with dati_aria as (
         data_a,
         val_param,
         cod_valid,
+        cod_validaz,
+        cod_validaz_reg,
         anno
     from {{ ref('stg_aria__rqa_dati_aria_cor') }}
 
@@ -44,6 +44,8 @@ joined as (
         d.data_a,
         d.val_param,
         d.cod_valid,
+        d.cod_validaz,
+        d.cod_validaz_reg,
         d.anno,
         c.cod_freq,
         p.sigla_param
@@ -64,6 +66,8 @@ select
     data_a,
     val_param,
     cod_valid,
+    cod_validaz,
+    cod_validaz_reg,
     anno,
     cod_freq,
     sigla_param

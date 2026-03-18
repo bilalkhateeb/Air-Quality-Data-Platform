@@ -43,4 +43,8 @@ models:
     marts:
       +schema: gold
       +materialized: table
+
+    utilities:
+      +schema: utilities
+      +materialized: table
     

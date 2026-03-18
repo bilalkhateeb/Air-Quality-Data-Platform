@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: int_aria__data_prep
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - cod_ubic
+              - cod_conf
+              - sigla_param
+              - data_da
+              - data_a
