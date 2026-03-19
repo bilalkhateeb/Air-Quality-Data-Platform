@@ -48,3 +48,9 @@ models:
       +schema: utilities
       +materialized: table
     
+dispatch:
+  # This is the default target that dbt will use when you run `dbt run` or
+  # other dbt commands without specifying a target. You can specify additional
+  # targets in profiles.yml, and override this default when running dbt commands.
+  - macro_namespace: dbt_utils
+    search_order: ['air_quality', 'dbt_utils']
