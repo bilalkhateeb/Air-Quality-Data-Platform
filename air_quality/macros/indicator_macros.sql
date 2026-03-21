@@ -1,12 +1,7 @@
 {# 
   Calculates percent validity as:
   (observed / theoretical) * 100
-
   Returns 0 when theoretical = 0 to avoid division errors.
-
-  IMPORTANT:
-  Wrap inputs in parentheses so expressions like
-  "available_days_ytd * 24" are evaluated correctly.
 #}
 {% macro calc_percentuale_validita(rilevati, teorici) %}
     round(
@@ -21,11 +16,7 @@
   Returns indicator validity:
   - 'Si' if percent validity >= threshold
   - 'No' otherwise
-
   Default threshold is 75.
-
-  IMPORTANT:
-  Wrap inputs in parentheses so compound expressions are safe.
 #}
 {% macro calc_validita_indicatore(rilevati, teorici, threshold=75) %}
     case
@@ -36,7 +27,7 @@
 {% endmacro %}
 
 {#
-  Standardizes the final output columns for one indicator row.
+  Standardizes the final output columns for one daily indicator row.
 #}
 {% macro generate_indicator_row(
     nome,
@@ -59,7 +50,32 @@
 {% endmacro %}
 
 {#
+  Standardizes the final output columns for one annual indicator row.
+#}
+{% macro generate_annual_indicator_row(
+    nome,
+    rif_norm,
+    cond_lim,
+    livello_critico,
+    valore,
+    dati_teorici,
+    valori_rilevati
+) %}
+    '{{ nome }}' as nome_indicatore,
+    '{{ rif_norm }}' as valore_limite,
+    '{{ cond_lim }}' as condizione_sul_limite,
+    '{{ livello_critico }}' as livello_critico,
+    {{ valore }} as valore,
+    {{ dati_teorici }} as dati_teorici,
+    {{ valori_rilevati }} as valori_rilevati,
+    {{ calc_percentuale_validita(valori_rilevati, dati_teorici) }} as percentuale_validita,
+    {{ calc_validita_indicatore(valori_rilevati, dati_teorici) }} as validita_indicatore
+{% endmacro %}
+
+{#
   Computes elapsed available days in the current year.
+  Adapted for partial-year data:
+  counts from the first available loaded day in that year.
 #}
 {% macro available_year_elapsed_days(current_date_expr, first_available_date_expr) %}
     datediff(
@@ -69,9 +85,22 @@
 {% endmacro %}
 
 {#
+  Returns the number of available hourly theoretical observations
+  in the loaded portion of a given year for annual indicators.
+#}
+{% macro available_year_hourly_theoretical(first_available_date_expr, last_available_date_expr) %}
+    (
+        datediff(
+            cast({{ last_available_date_expr }} as date),
+            cast({{ first_available_date_expr }} as date)
+        ) + 1
+    ) * 24
+{% endmacro %}
+
+{#
   Reusable window clause for year-to-date calculations.
 #}
-{% macro o3_ytd_window(date_col='data_day') %}
+{% macro ytd_window(date_col='data_day') %}
     partition by extract(year from {{ date_col }}), cod_ubic, cod_conf
     order by {{ date_col }}
     rows between unbounded preceding and current row
@@ -82,6 +111,30 @@
 #}
 {% macro ytd_sum(expr, date_col='data_day') %}
     sum({{ expr }}) over (
-        {{ o3_ytd_window(date_col) }}
+        {{ ytd_window(date_col) }}
     )
+{% endmacro %}
+
+{#
+  Builds a rolling 3-hour sum of hourly exceedance flags within the same day.
+  The partition includes data_day so the sequence does not cross midnight.
+#}
+{% macro rolling_3h_threshold_sum(flag_expr) %}
+(
+    {{ flag_expr }}
+    + coalesce(
+        lag({{ flag_expr }}, 1) over (
+            partition by cod_ubic, cod_conf, data_day
+            order by data_da
+        ),
+        0
+    )
+    + coalesce(
+        lag({{ flag_expr }}, 2) over (
+            partition by cod_ubic, cod_conf, data_day
+            order by data_da
+        ),
+        0
+    )
+)
 {% endmacro %}

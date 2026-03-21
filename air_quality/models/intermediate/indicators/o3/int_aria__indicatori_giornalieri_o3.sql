@@ -8,41 +8,13 @@
 
 -- Final O3 indicator definitions used in the unpivot step
 {% set indicator_configs = [
-    {
-        "nome": "Ozono (O3): valore massima media oraria",
-        "rif": "", "cond": "", "note": "",
-        "valore": "max_val_param", "teorici": "24", "rilevati": "count_val_param"
-    },
-    {
-        "nome": "Ozono (O3): numero di medie orarie superiori al livello di informazione",
-        "rif": "soglia informazione: 180 µg/m3", "cond": "", "note": "",
-        "valore": "count_over_180", "teorici": "24", "rilevati": "count_val_param"
-    },
-    {
-        "nome": "Ozono (O3): numero di medie orarie superiori al livello di informazione da inizio anno",
-        "rif": "soglia informazione: 180 µg/m3", "cond": "", "note": "",
-        "valore": "ytd_over_180", "teorici": "available_days_ytd * 24", "rilevati": "ytd_count_val"
-    },
-    {
-        "nome": "Ozono (O3): numero di medie orarie superiori al livello di allarme",
-        "rif": "soglia di allarme: 240 µg/m3", "cond": "per 3 ore consecutive", "note": "4 ore consecutive = 2 superi",
-        "valore": "count_superi_3h", "teorici": "24", "rilevati": "count_val_param"
-    },
-    {
-        "nome": "Ozono (O3): numero di medie orarie superiori al livello di allarme da inizio anno",
-        "rif": "soglia di allarme: 240 µg/m3", "cond": "per 3 ore consecutive", "note": "4 ore consecutive = 2 superi",
-        "valore": "ytd_superi_3h", "teorici": "available_days_ytd * 24", "rilevati": "ytd_count_val"
-    },
-    {
-        "nome": "Ozono (O3): valore massima media 8 oraria",
-        "rif": "", "cond": "", "note": "",
-        "valore": "max_mv_avg", "teorici": "24", "rilevati": "count_mv_avg"
-    },
-    {
-        "nome": "Ozono (O3): numero di giorni con medie su 8 ore massime giornaliere superiori al valore obiettivo a lungo termine da inizio anno",
-        "rif": "obiettivo: 120 µg/m3", "cond": "", "note": "",
-        "valore": "ytd_8h_over_120", "teorici": "available_days_ytd", "rilevati": "ytd_valid_days"
-    }
+    {"nome":"Ozono (O3): valore massima media oraria","rif":"","cond":"","note":"","valore":"max_val_param","teorici":"24","rilevati":"count_val_param"},
+    {"nome":"Ozono (O3): numero di medie orarie superiori al livello di informazione","rif":"soglia informazione: 180 µg/m3","cond":"","note":"","valore":"count_over_180","teorici":"24","rilevati":"count_val_param"},
+    {"nome":"Ozono (O3): numero di medie orarie superiori al livello di informazione da inizio anno","rif":"soglia informazione: 180 µg/m3","cond":"","note":"","valore":"ytd_over_180","teorici":"available_days_ytd * 24","rilevati":"ytd_count_val"},
+    {"nome":"Ozono (O3): numero di medie orarie superiori al livello di allarme","rif":"soglia di allarme: 240 µg/m3","cond":"per 3 ore consecutive","note":"4 ore consecutive = 2 superi","valore":"count_superi_3h","teorici":"24","rilevati":"count_val_param"},
+    {"nome":"Ozono (O3): numero di medie orarie superiori al livello di allarme da inizio anno","rif":"soglia di allarme: 240 µg/m3","cond":"per 3 ore consecutive","note":"4 ore consecutive = 2 superi","valore":"ytd_superi_3h","teorici":"available_days_ytd * 24","rilevati":"ytd_count_val"},
+    {"nome":"Ozono (O3): valore massima media 8 oraria","rif":"","cond":"","note":"","valore":"max_mv_avg","teorici":"24","rilevati":"count_mv_avg"},
+    {"nome":"Ozono (O3): numero di giorni con medie su 8 ore massime giornaliere superiori al valore obiettivo a lungo termine da inizio anno","rif":"obiettivo: 120 µg/m3","cond":"","note":"","valore":"ytd_8h_over_120","teorici":"available_days_ytd","rilevati":"ytd_valid_days"}
 ] %}
 
 with hourly_base as (
@@ -93,19 +65,16 @@ lvl_{{ lvl.code }}_hourly as (
 ),
 
 lvl_{{ lvl.code }}_rolling as (
+
     select
         data_day,
         cod_ubic,
         cod_conf,
         is_over_180,
-        (
-            is_over_240
-            -- Wrap the 2-argument LAG in a COALESCE to handle the default 0
-            + coalesce(lag(is_over_240, 1) over (partition by cod_ubic, cod_conf, data_day order by data_da), 0)
-            + coalesce(lag(is_over_240, 2) over (partition by cod_ubic, cod_conf, data_day order by data_da), 0)
-        ) as rolling_3h_over_240,
+        {{ rolling_3h_threshold_sum('is_over_240') }} as rolling_3h_over_240,
         val_param
     from lvl_{{ lvl.code }}_hourly
+
 ),
 
 lvl_{{ lvl.code }}_daily_hourly as (
