@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: fct_aria__indicatori_giornalieri
+    description: Unified daily BI-ready air quality indicators for O3 and NO2.
+    columns:
+      - name: data
+        description: Reference date of the daily indicator record.
+      - name: cod_ubic
+        description: Monitoring station location code.
+      - name: cod_conf
+        description: Configuration code.
+      - name: sigla_param
+        description: Pollutant parameter code carried from the silver layer.
+      - name: livello_validazione
+        description: Validation level description.
+      - name: cod_liv_validazione
+        description: Validation level code.
+      - name: nome_indicatore
+        description: Indicator name.
+      - name: riferimento_normativo
+        description: Regulatory reference associated with the indicator.
+      - name: condizione_sul_limite
+        description: Condition associated with the regulatory limit.
+      - name: valore
+        description: Indicator value.
+      - name: note_di_lavoro
+        description: Additional working notes for the indicator.
+      - name: dati_teorici
+        description: Theoretical number of expected observations.
+      - name: valori_rilevati
+        description: Number of observed values used in the indicator calculation.
+      - name: percentuale_validita
+        description: Percentage of validity based on observed versus theoretical values.
+      - name: validita_indicatore
+        description: Indicator validity flag.
+
+  - name: fct_aria__indicatori_annuali
+    description: Unified annual BI-ready air quality indicators for O3 and NO2.
+    columns:
+      - name: anno
+        description: Reference year of the annual indicator record.
+      - name: cod_ubic
+        description: Monitoring station location code.
+      - name: cod_conf
+        description: Configuration code.
+      - name: sigla_param
+        description: Pollutant parameter code carried from the silver layer.
+      - name: livello_validazione
+        description: Validation level description.
+      - name: cod_liv_validazione
+        description: Validation level code.
+      - name: nome_indicatore
+        description: Indicator name.
+      - name: valore_limite
+        description: Limit value associated with the indicator, when applicable.
+      - name: condizione_sul_limite
+        description: Condition associated with the regulatory limit.
+      - name: livello_critico
+        description: Critical level associated with the indicator, when applicable.
+      - name: valore
+        description: Indicator value.
+      - name: dati_teorici
+        description: Theoretical number of expected observations.
+      - name: valori_rilevati
+        description: Number of observed values used in the indicator calculation.
+      - name: percentuale_validita
+        description: Percentage of validity based on observed versus theoretical values.
+      - name: validita_indicatore
+        description: Indicator validity flag.

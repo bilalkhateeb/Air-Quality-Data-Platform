@@ -38,6 +38,7 @@ with hourly_base as (
         data_da,
         cod_ubic,
         cod_conf,
+        sigla_param,
         val_param,
         cod_valid,
         cod_validaz,
@@ -74,6 +75,7 @@ lvl_{{ lvl.code }}_hourly as (
         data_da,
         cod_ubic,
         cod_conf,
+        sigla_param,
         val_param,
         case when round(val_param) > 200 then 1 else 0 end as is_over_200,
         case when round(val_param) > 400 then 1 else 0 end as is_over_400
@@ -88,6 +90,7 @@ lvl_{{ lvl.code }}_rolling as (
         data_day,
         cod_ubic,
         cod_conf,
+        sigla_param,
         val_param,
         is_over_200,
         {{ rolling_3h_threshold_sum('is_over_400') }} as rolling_3h_over_400
@@ -101,18 +104,16 @@ lvl_{{ lvl.code }}_daily_hourly as (
         data_day,
         cod_ubic,
         cod_conf,
+        sigla_param,
         count(val_param) as count_val_param,
         max(round(val_param)) as max_val_param,
         sum(is_over_200) as count_over_200,
         sum(case when rolling_3h_over_400 = 3 then 1 else 0 end) as count_superi_3h,
         min(data_day) over (
-            partition by extract(year from data_day), cod_ubic, cod_conf
+            partition by extract(year from data_day), cod_ubic, cod_conf, sigla_param
         ) as first_available_day_in_year
     from lvl_{{ lvl.code }}_rolling
-    group by
-        data_day,
-        cod_ubic,
-        cod_conf
+    group by data_day, cod_ubic, cod_conf, sigla_param
 
 ),
 
@@ -134,6 +135,7 @@ lvl_{{ lvl.code }}_hourly_unpivoted as (
         data_day as data,
         cod_ubic,
         cod_conf,
+        sigla_param,
         '{{ lvl.name }}' as livello_validazione,
         '{{ lvl.code }}' as cod_liv_validazione,
         {{ generate_indicator_row(
@@ -157,6 +159,7 @@ lvl_{{ lvl.code }}_daily_mean_unpivoted as (
         h.data_day as data,
         h.cod_ubic,
         h.cod_conf,
+        h.sigla_param,
         '{{ lvl.name }}' as livello_validazione,
         '{{ lvl.code }}' as cod_liv_validazione,
         {{ generate_indicator_row(
@@ -169,16 +172,14 @@ lvl_{{ lvl.code }}_daily_mean_unpivoted as (
             'm.' ~ lvl.mean_count_col
         ) }}
     from (
-        select
-            data_day,
-            cod_ubic,
-            cod_conf
+        select data_day, cod_ubic, cod_conf, sigla_param
         from lvl_{{ lvl.code }}_daily_hourly
     ) h
     left join daily_mean_no2 m
-      on h.data_day = m.data_day
-     and h.cod_ubic = m.cod_ubic
-     and h.cod_conf = m.cod_conf
+        on h.data_day = m.data_day
+       and h.cod_ubic = m.cod_ubic
+       and h.cod_conf = m.cod_conf
+       and h.sigla_param = m.sigla_param
 
 ),
 
@@ -188,8 +189,9 @@ lvl_{{ lvl.code }}_unpivoted as (
     union all
     select * from lvl_{{ lvl.code }}_daily_mean_unpivoted
 
-){% if not loop.last %},{% endif %}
+)
 
+{% if not loop.last %},{% endif %}
 {% endfor %}
 
 select * from lvl_VS_unpivoted

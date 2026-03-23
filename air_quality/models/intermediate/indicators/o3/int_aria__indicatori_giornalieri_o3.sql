@@ -24,6 +24,7 @@ with hourly_base as (
         data_da,
         cod_ubic,
         cod_conf,
+        sigla_param,
         val_param,
         cod_valid,
         cod_validaz,
@@ -39,6 +40,7 @@ mv8h_base as (
         cast(data_da as date) as data_day,
         cod_ubic,
         cod_conf,
+        sigla_param,
         mv_avg_val,
         mv_avg_val_cor,
         mv_avg_cert
@@ -56,6 +58,7 @@ lvl_{{ lvl.code }}_hourly as (
         data_da,
         cod_ubic,
         cod_conf,
+        sigla_param,
         val_param,
         case when round(val_param) > 180 then 1 else 0 end as is_over_180,
         case when round(val_param) > 240 then 1 else 0 end as is_over_240
@@ -70,6 +73,7 @@ lvl_{{ lvl.code }}_rolling as (
         data_day,
         cod_ubic,
         cod_conf,
+        sigla_param,
         is_over_180,
         {{ rolling_3h_threshold_sum('is_over_240') }} as rolling_3h_over_240,
         val_param
@@ -83,12 +87,13 @@ lvl_{{ lvl.code }}_daily_hourly as (
         data_day,
         cod_ubic,
         cod_conf,
+        sigla_param,
         count(val_param) as count_val_param,
         max(round(val_param)) as max_val_param,
         sum(is_over_180) as count_over_180,
         sum(case when rolling_3h_over_240 = 3 then 1 else 0 end) as count_superi_3h
     from lvl_{{ lvl.code }}_rolling
-    group by data_day, cod_ubic, cod_conf
+    group by data_day, cod_ubic, cod_conf, sigla_param
 
 ),
 
@@ -98,10 +103,11 @@ lvl_{{ lvl.code }}_daily_8h as (
         data_day,
         cod_ubic,
         cod_conf,
+        sigla_param,
         count({{ lvl.mv_col }}) as count_mv_avg,
         max(round({{ lvl.mv_col }})) as max_mv_avg
     from mv8h_base
-    group by data_day, cod_ubic, cod_conf
+    group by data_day, cod_ubic, cod_conf, sigla_param
 
 ),
 
@@ -111,20 +117,22 @@ lvl_{{ lvl.code }}_daily as (
         h.data_day,
         h.cod_ubic,
         h.cod_conf,
+        h.sigla_param,
         h.count_val_param,
         h.max_val_param,
         h.count_over_180,
         h.count_superi_3h,
         min(h.data_day) over (
-            partition by extract(year from h.data_day), h.cod_ubic, h.cod_conf
+            partition by extract(year from h.data_day), h.cod_ubic, h.cod_conf, h.sigla_param
         ) as first_available_day_in_year,
         coalesce(m.count_mv_avg, 0) as count_mv_avg,
         m.max_mv_avg
     from lvl_{{ lvl.code }}_daily_hourly h
     left join lvl_{{ lvl.code }}_daily_8h m
-      on h.data_day = m.data_day
-     and h.cod_ubic = m.cod_ubic
-     and h.cod_conf = m.cod_conf
+        on h.data_day = m.data_day
+       and h.cod_ubic = m.cod_ubic
+       and h.cod_conf = m.cod_conf
+       and h.sigla_param = m.sigla_param
 
 ),
 
@@ -134,11 +142,9 @@ lvl_{{ lvl.code }}_metrics as (
         *,
         {{ available_year_elapsed_days('data_day', 'first_available_day_in_year') }} as available_days_ytd,
         {{ calc_validita_indicatore('count_mv_avg', '24') }} as validita_8h,
-
         {{ ytd_sum('count_over_180') }} as ytd_over_180,
         {{ ytd_sum('count_superi_3h') }} as ytd_superi_3h,
         {{ ytd_sum('count_val_param') }} as ytd_count_val,
-
         {{ ytd_sum("case when max_mv_avg > 120 and validita_8h = 'Si' then 1 else 0 end") }} as ytd_8h_over_120,
         {{ ytd_sum("case when validita_8h = 'Si' then 1 else 0 end") }} as ytd_valid_days
     from lvl_{{ lvl.code }}_daily
@@ -152,6 +158,7 @@ lvl_{{ lvl.code }}_unpivoted as (
         data_day as data,
         cod_ubic,
         cod_conf,
+        sigla_param,
         '{{ lvl.name }}' as livello_validazione,
         '{{ lvl.code }}' as cod_liv_validazione,
         {{ generate_indicator_row(
@@ -167,8 +174,9 @@ lvl_{{ lvl.code }}_unpivoted as (
     {% if not loop.last %} union all {% endif %}
     {% endfor %}
 
-){% if not loop.last %},{% endif %}
+)
 
+{% if not loop.last %},{% endif %}
 {% endfor %}
 
 select * from lvl_VS_unpivoted

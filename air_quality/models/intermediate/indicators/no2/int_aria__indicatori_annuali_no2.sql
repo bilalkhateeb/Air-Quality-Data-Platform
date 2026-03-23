@@ -36,6 +36,7 @@ with no2_hourly_base as (
         data_da,
         cod_ubic,
         cod_conf,
+        sigla_param,
         val_param,
         cod_valid,
         cod_validaz,
@@ -53,6 +54,7 @@ nox_hourly_base as (
         data_da,
         cod_ubic,
         cod_conf,
+        sigla_param,
         val_param,
         cod_valid,
         cod_validaz,
@@ -72,6 +74,7 @@ lvl_{{ lvl.code }}_no2_hourly as (
         data_da,
         cod_ubic,
         cod_conf,
+        sigla_param,
         val_param,
         case when round(val_param) > 100 then 1 else 0 end as is_over_100,
         case when round(val_param) > 140 then 1 else 0 end as is_over_140,
@@ -89,6 +92,7 @@ lvl_{{ lvl.code }}_no2_rolling as (
         anno,
         cod_ubic,
         cod_conf,
+        sigla_param,
         val_param,
         is_over_100,
         is_over_140,
@@ -104,10 +108,11 @@ lvl_{{ lvl.code }}_no2_year_bounds as (
         anno,
         cod_ubic,
         cod_conf,
+        sigla_param,
         min(data_day) as first_available_day_in_year,
         max(data_day) as last_available_day_in_year
     from lvl_{{ lvl.code }}_no2_hourly
-    group by anno, cod_ubic, cod_conf
+    group by anno, cod_ubic, cod_conf, sigla_param
 
 ),
 
@@ -117,6 +122,7 @@ lvl_{{ lvl.code }}_no2_annual as (
         r.anno,
         r.cod_ubic,
         r.cod_conf,
+        r.sigla_param,
         count(r.val_param) as count_no2,
         sum(r.is_over_200) as count_over_200,
         sum(r.is_over_140) as count_over_140,
@@ -128,7 +134,7 @@ lvl_{{ lvl.code }}_no2_annual as (
         round(stddev_samp(r.val_param), 2) as stddev_no2,
         round(percentile_cont(0.5) within group (order by r.val_param)) as median_no2
     from lvl_{{ lvl.code }}_no2_rolling r
-    group by r.anno, r.cod_ubic, r.cod_conf
+    group by r.anno, r.cod_ubic, r.cod_conf, r.sigla_param
 
 ),
 
@@ -138,6 +144,7 @@ lvl_{{ lvl.code }}_no2_final as (
         a.anno,
         a.cod_ubic,
         a.cod_conf,
+        a.sigla_param,
         a.count_no2,
         a.count_over_200,
         a.count_over_140,
@@ -151,9 +158,10 @@ lvl_{{ lvl.code }}_no2_final as (
         {{ available_year_hourly_theoretical('b.first_available_day_in_year', 'b.last_available_day_in_year') }} as available_hours_in_year
     from lvl_{{ lvl.code }}_no2_annual a
     left join lvl_{{ lvl.code }}_no2_year_bounds b
-      on a.anno = b.anno
-     and a.cod_ubic = b.cod_ubic
-     and a.cod_conf = b.cod_conf
+        on a.anno = b.anno
+       and a.cod_ubic = b.cod_ubic
+       and a.cod_conf = b.cod_conf
+       and a.sigla_param = b.sigla_param
 
 ),
 
@@ -164,6 +172,7 @@ lvl_{{ lvl.code }}_no2_unpivoted as (
         anno,
         cod_ubic,
         cod_conf,
+        sigla_param,
         '{{ lvl.name }}' as livello_validazione,
         '{{ lvl.code }}' as cod_liv_validazione,
         {{ generate_annual_indicator_row(
@@ -188,6 +197,7 @@ lvl_{{ lvl.code }}_nox_hourly as (
         data_day,
         cod_ubic,
         cod_conf,
+        sigla_param,
         val_param
     from nox_hourly_base
     where {{ lvl.hourly_cond }}
@@ -200,10 +210,11 @@ lvl_{{ lvl.code }}_nox_year_bounds as (
         anno,
         cod_ubic,
         cod_conf,
+        sigla_param,
         min(data_day) as first_available_day_in_year_nox,
         max(data_day) as last_available_day_in_year_nox
     from lvl_{{ lvl.code }}_nox_hourly
-    group by anno, cod_ubic, cod_conf
+    group by anno, cod_ubic, cod_conf, sigla_param
 
 ),
 
@@ -213,10 +224,11 @@ lvl_{{ lvl.code }}_nox_annual as (
         anno,
         cod_ubic,
         cod_conf,
+        sigla_param,
         count(val_param) as count_nox,
         round(avg(val_param) * 1.912, 1) as avg_nox_as_no2
     from lvl_{{ lvl.code }}_nox_hourly
-    group by anno, cod_ubic, cod_conf
+    group by anno, cod_ubic, cod_conf, sigla_param
 
 ),
 
@@ -226,14 +238,16 @@ lvl_{{ lvl.code }}_nox_final as (
         a.anno,
         a.cod_ubic,
         a.cod_conf,
+        a.sigla_param,
         a.count_nox,
         a.avg_nox_as_no2,
         {{ available_year_hourly_theoretical('b.first_available_day_in_year_nox', 'b.last_available_day_in_year_nox') }} as available_hours_in_year_nox
     from lvl_{{ lvl.code }}_nox_annual a
     left join lvl_{{ lvl.code }}_nox_year_bounds b
-      on a.anno = b.anno
-     and a.cod_ubic = b.cod_ubic
-     and a.cod_conf = b.cod_conf
+        on a.anno = b.anno
+       and a.cod_ubic = b.cod_ubic
+       and a.cod_conf = b.cod_conf
+       and a.sigla_param = b.sigla_param
 
 ),
 
@@ -243,6 +257,7 @@ lvl_{{ lvl.code }}_nox_unpivoted as (
         anno,
         cod_ubic,
         cod_conf,
+        sigla_param,
         '{{ lvl.name }}' as livello_validazione,
         '{{ lvl.code }}' as cod_liv_validazione,
         {{ generate_annual_indicator_row(
@@ -256,8 +271,9 @@ lvl_{{ lvl.code }}_nox_unpivoted as (
         ) }}
     from lvl_{{ lvl.code }}_nox_final
 
-){% if not loop.last %},{% endif %}
+)
 
+{% if not loop.last %},{% endif %}
 {% endfor %}
 
 select * from lvl_VS_no2_unpivoted
