@@ -67,3 +67,33 @@ Internal Error
 [0m18:38:05.453731 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000020428434D40>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x00000204275B0A70>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000020429A97500>]}
 [0m18:38:05.454815 [debug] [MainThread]: Flushing usage events
 [0m18:38:06.874169 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m15:58:22.112892 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000020CB1957F20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000020CB1912450>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000020CB28C1730>]}
+
+
+============================== 15:58:22.130140 | dcb62106-95e1-4c6b-a3ee-91f07e544b01 ==============================
+[0m15:58:22.130140 [info ] [MainThread]: Running with dbt=1.11.7
+[0m15:58:22.133856 [debug] [MainThread]: running dbt with arguments {'version_check': 'True', 'no_print': 'None', 'static_parser': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'target_path': 'None', 'printer_width': '80', 'write_json': 'True', 'introspect': 'True', 'log_cache_events': 'False', 'empty': 'False', 'cache_selected_only': 'False', 'log_format': 'default', 'debug': 'False', 'fail_fast': 'False', 'partial_parse': 'True', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'profiles_dir': 'C:\\Users\\Bilal\\.dbt', 'use_colors': 'True', 'invocation_command': 'dbt run --select int_aria__media_giornaliera_cor', 'indirect_selection': 'eager', 'use_experimental_parser': 'False', 'log_path': 'logs'}
+[0m15:58:22.133856 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path C:\Users\Bilal\Desktop\Github Repository\Air-Quality-Data-Platform\dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m15:58:22.133856 [debug] [MainThread]: Command `dbt run` failed at 15:58:22.133856 after 0.29 seconds
+[0m15:58:22.133856 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000020CB187C860>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000020CB5432BA0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000020CB4B6D2B0>]}
+[0m15:58:22.138064 [debug] [MainThread]: Flushing usage events
+[0m15:58:22.144024 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m16:44:31.894540 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002AEA61A5970>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002AEA39AF7D0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002AEA2608AA0>]}
+
+
+============================== 16:44:31.916646 | 15311bb8-dbbc-48b8-a78a-4f7e28f29824 ==============================
+[0m16:44:31.916646 [info ] [MainThread]: Running with dbt=1.11.7
+[0m16:44:31.919838 [debug] [MainThread]: running dbt with arguments {'version_check': 'True', 'no_print': 'None', 'static_parser': 'True', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'printer_width': '80', 'write_json': 'True', 'empty': 'False', 'log_cache_events': 'False', 'introspect': 'True', 'cache_selected_only': 'False', 'fail_fast': 'False', 'debug': 'False', 'log_format': 'default', 'profiles_dir': 'C:\\Users\\Bilal\\.dbt', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'partial_parse': 'True', 'indirect_selection': 'eager', 'invocation_command': 'dbt run --select int_aria__media_giornaliera_cor', 'use_colors': 'True', 'use_experimental_parser': 'False', 'log_path': 'logs'}
+[0m16:44:31.923931 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path C:\Users\Bilal\Desktop\Github Repository\Air-Quality-Data-Platform\dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m16:44:31.925942 [debug] [MainThread]: Command `dbt run` failed at 16:44:31.925942 after 1.03 seconds
+[0m16:44:31.928634 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002AEA5675700>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002AEA60B45C0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002AEA5FF2CC0>]}
+[0m16:44:31.930646 [debug] [MainThread]: Flushing usage events
+[0m16:44:34.269562 [debug] [MainThread]: An error was encountered while trying to flush usage events

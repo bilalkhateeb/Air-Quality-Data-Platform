@@ -73,9 +73,8 @@
 {% endmacro %}
 
 {#
-  Computes elapsed available days in the current year.
-  Adapted for partial-year data:
-  counts from the first available loaded day in that year.
+  For each row, calculate how many days have passed 
+  since the first available loaded day in that same year, up to the current day.
 #}
 {% macro available_year_elapsed_days(current_date_expr, first_available_date_expr) %}
     datediff(
@@ -97,28 +96,24 @@
     ) * 24
 {% endmacro %}
 
-{#
-  Reusable window clause for year-to-date calculations.
-#}
-{% macro ytd_window(date_col='data_day') %}
-    partition by extract(year from {{ date_col }}), cod_ubic, cod_conf
-    order by {{ date_col }}
-    rows between unbounded preceding and current row
-{% endmacro %}
-
-{#
-  Reusable YTD cumulative sum expression.
-#}
+{# Reusable YTD cumulative sum expression. Up to this day, how many have we accumulated since the beginning of the year? #}
 {% macro ytd_sum(expr, date_col='data_day') %}
     sum({{ expr }}) over (
         {{ ytd_window(date_col) }}
     )
 {% endmacro %}
 
-{#
-  Builds a rolling 3-hour sum of hourly exceedance flags within the same day.
+{# For each station/configuration and each year, it keeps adding values from the start of the year up to the current day. #}
+{% macro ytd_window(date_col='data_day') %}
+    partition by extract(year from {{ date_col }}), cod_ubic, cod_conf
+    order by {{ date_col }}
+    rows between unbounded preceding and current row
+{% endmacro %}
+
+
+{# Builds a rolling 3-hour sum of hourly exceedance flags within the same day.
   The partition includes data_day so the sequence does not cross midnight.
-#}
+  coalesce acts as a safety net. If there is no previous hour, it substitutes a 0 #}
 {% macro rolling_3h_threshold_sum(flag_expr) %}
 (
     {{ flag_expr }}
